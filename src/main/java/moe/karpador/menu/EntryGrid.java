@@ -97,6 +97,7 @@ public class EntryGrid extends View {
     public void mousePressed(int mouseButton, int mouseX, int mouseY) {
         if (mouseButton == LEFT) {
             if (mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
+                mouseY = (int) (mouseY + scrollOffset);
                 for(ViewInstance<View> ei : entries) {
                     if (ei.hover(mouseX, mouseY)) {
                         PVector pos = ei.mousePos(mouseX, mouseY);
