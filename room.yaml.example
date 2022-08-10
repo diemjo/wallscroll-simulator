@@ -1,0 +1,9 @@
+size: [3000, 2000, 3000]
+furnitures:
+  - name: door
+    size: [200, 800, 30]
+    position: [200, 0, 0]
+
+  - name: desk
+    size: [1500, 700, 600]
+    position: [1500, 0, 2400]
