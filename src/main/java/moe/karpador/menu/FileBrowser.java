@@ -68,26 +68,26 @@ public class FileBrowser extends View {
             case WallscrollBrowser -> {
                 List<View> currentWallscrolls = wallscrolls.stream()
                         .filter(w -> switch (w.wallscroll.format) {
-                            case B2P -> titleBar.view.checked("B2") && titleBar.view.checked("portrait");
-                            case B2L -> titleBar.view.checked("B2") && titleBar.view.checked("landscape");
-                            case B1P -> titleBar.view.checked("B1") && titleBar.view.checked("portrait");
-                            case B1L -> titleBar.view.checked("B1") && titleBar.view.checked("landscape");
-                            case B0P -> titleBar.view.checked("B0") && titleBar.view.checked("portrait");
-                            case LONG -> titleBar.view.checked("Long") && titleBar.view.checked("portrait");
+                            case B2P -> titleBar.v.checked("B2") && titleBar.v.checked("portrait");
+                            case B2L -> titleBar.v.checked("B2") && titleBar.v.checked("landscape");
+                            case B1P -> titleBar.v.checked("B1") && titleBar.v.checked("portrait");
+                            case B1L -> titleBar.v.checked("B1") && titleBar.v.checked("landscape");
+                            case B0P -> titleBar.v.checked("B0") && titleBar.v.checked("portrait");
+                            case LONG -> titleBar.v.checked("Long") && titleBar.v.checked("portrait");
                         })
                         .filter(w -> switch (w.wallscroll.rating) {
                             case SAFE -> true;
-                            case EXPLICIT -> !titleBar.view.checked("Only safe");
+                            case EXPLICIT -> !titleBar.v.checked("Only safe");
                         })
                         .map(w -> (View) w)
                         .toList();
-                grid.view.setEntries(currentWallscrolls);
+                grid.v.setEntries(currentWallscrolls);
             }
             case ConfigBrowser -> {
                 List<View> currentConfigs = configs.stream()
                         .map(c -> (View) c)
                         .toList();
-                grid.view.setEntries(currentConfigs);
+                grid.v.setEntries(currentConfigs);
             }
         }
     }
@@ -96,7 +96,7 @@ public class FileBrowser extends View {
     protected PGraphics build(ViewConstraint constraint) {
         float width = max(constraint.minSize.x, constraint.maxSize.x * 4 / 5);
         float height = max(constraint.minSize.y, constraint.maxSize.y * 4 / 5);
-        float titleHeight = titleBar.view.textSize*3;
+        float titleHeight = titleBar.v.textSize*3;
         titleBar.draw(ViewConstraint.max(new PVector(width, titleHeight)));
         titleBar.position = new PVector(0, 0);
         grid.draw(ViewConstraint.max(new PVector(width, height - titleHeight)));
@@ -113,41 +113,35 @@ public class FileBrowser extends View {
     }
 
     @Override
-    public boolean update(long time, int mouseX, int mouseY) {
-        PVector tPos = titleBar.mousePos(mouseX, mouseY);
-        if (titleBar.view.update(time, (int) tPos.x, (int) tPos.y)) {
+    public boolean update(long time) {
+        if (titleBar.v.update(time)) {
             loadEntries();
             modified();
         }
-        PVector gPos = grid.mousePos(mouseX, mouseY);
-        if (grid.view.update(time, (int) gPos.x, (int) gPos.y)) {
+        if (grid.v.update(time)) {
             modified();
         }
-        return super.update(time, mouseX, mouseY);
+        return super.update(time);
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
-            if (mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
-                if (titleBar.hover(mouseX, mouseY)) {
-                    PVector pos = titleBar.mousePos(mouseX, mouseY);
-                    titleBar.view.mousePressed(mouseButton, (int) pos.x, (int) pos.y);
-                }
-                if (grid.hover(mouseX, mouseY)) {
-                    PVector pos = grid.mousePos(mouseX, mouseY);
-                    grid.view.mousePressed(mouseButton, (int) pos.x, (int) pos.y);
-                }
-            } else {
-                WallscrollSimulator.popView();
+            if (titleBar.hover(mouse)) {
+                PVector pos = titleBar.mousePos(mouse);
+                titleBar.v.mousePressed(mouseButton, pos);
+            } else if (grid.hover(mouse)) {
+                PVector pos = grid.mousePos(mouse);
+                grid.v.mousePressed(mouseButton, pos);
             }
         }
     }
 
     @Override
-    public void mouseWheel(MouseEvent e) {
-        if (grid.hover(mouseX, mouseY)) {
-            grid.view.mouseWheel(e);
+    public void mouseWheel(int scrollCount, PVector mouse) {
+        if (grid.hover(mouse)) {
+            PVector pos = grid.mousePos(mouse);
+            grid.v.mouseWheel(scrollCount, pos);
         }
     }
 

@@ -47,8 +47,8 @@ public class ConfigEntry extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
-        if (mouseButton == PConstants.LEFT && mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
+    public void mousePressed(int mouseButton, PVector mouse) {
+        if (mouseButton == PConstants.LEFT) {
             func.run();
         }
     }

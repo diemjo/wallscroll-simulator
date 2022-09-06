@@ -10,7 +10,6 @@ import moe.karpador.view.ViewInstance;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-import java.util.HashMap;
 import java.util.List;
 
 import static moe.karpador.menu.FileBrowser.BrowserType.ConfigBrowser;
@@ -29,12 +28,12 @@ public class Menu extends View {
                         textSize
                 )),
                 new ViewInstance<>(new TextButton("Add wallscroll",
-                        () -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(WallscrollBrowser, roomView))),
+                        () -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(WallscrollBrowser, roomView), true)),
                         textSize
                 )),
                 new ViewInstance<>(new TextButton("Load wallscroll config",
                         () -> {
-                            Runnable r = () -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(ConfigBrowser, roomView)));
+                            Runnable r = () -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(ConfigBrowser, roomView), true));
                             if (room.changed)
                                 attemptTo("Are you sure you want to overwrite room setup? You have unsaved changes!", r);
                             else
@@ -69,7 +68,7 @@ public class Menu extends View {
     @Override
     protected PGraphics build(ViewConstraint constraint) {
         int maxWidth = (int) (1.3f*buttons.stream()
-                        .map(b -> WallscrollSimulator.getTextWidth(b.view.text, b.view.textSize))
+                        .map(b -> WallscrollSimulator.getTextWidth(b.v.text, b.v.textSize))
                         .max(Float::compareTo)
                         .orElse(0f));
         int padding = maxWidth/5;
@@ -101,31 +100,26 @@ public class Menu extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
-            if (mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
-                for (ViewInstance<TextButton> bi : buttons) {
-                    if (bi.hover(mouseX, mouseY)) {
-                        PVector pos = bi.mousePos(mouseX, mouseY);
-                        bi.view.mousePressed(mouseButton, (int) pos.x, (int) pos.y);
-                        break;
-                    }
+            for (ViewInstance<TextButton> bi : buttons) {
+                if (bi.hover(mouse)) {
+                    PVector pos = bi.mousePos(mouse);
+                    bi.v.mousePressed(mouseButton, pos);
+                    break;
                 }
-            } else {
-                WallscrollSimulator.popView();
             }
         }
     }
 
     @Override
-    public boolean update(long time, int mouseX, int mouseY) {
+    public boolean update(long time) {
         for (ViewInstance<TextButton> bi : buttons) {
-            PVector pos = bi.mousePos(mouseX, mouseY);
-            if (bi.view.update(time, (int) pos.x, (int) pos.y)) {
+            if (bi.v.update(time)) {
                 modified();
             }
         }
-        return super.update(time, mouseX, mouseY);
+        return super.update(time);
     }
 
     // HELPERS
@@ -133,6 +127,6 @@ public class Menu extends View {
 
     private void attemptTo(String warning, Runnable r) {
         ConfirmMenu confirmMenu = new ConfirmMenu(warning, WallscrollSimulator.menuTextSize(), r);
-        WallscrollSimulator.pushView(new Container<>(confirmMenu));
+        WallscrollSimulator.pushView(new Container<>(confirmMenu, true));
     }
 }

@@ -5,14 +5,11 @@ import moe.karpador.view.Container;
 import moe.karpador.view.View;
 import moe.karpador.view.ViewConstraint;
 import moe.karpador.view.ViewInstance;
-import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import static processing.core.PConstants.LEFT;
 
@@ -20,22 +17,26 @@ public class TitleBar extends View {
     public final String title;
     public final int textSize;
     private final ArrayList<ViewInstance<Container<CheckBox>>> checkboxes;
+    private final ArrayList<CheckBox.Option> options;
 
     public TitleBar(String title, int textSize) {
         super();
         this.title = title;
         this.textSize = textSize;
         this.checkboxes = new ArrayList<>();
+        this.options = new ArrayList<>();
     }
 
     public TitleBar withCheckbox(String name, boolean defaultState) {
-        CheckBox c = new CheckBox(name, WallscrollSimulator.buttonDescTextSize(), defaultState);
-        checkboxes.add(new ViewInstance<>(new Container<>(c)));
+        CheckBox.Option option = new CheckBox.Option(name, defaultState);
+        options.add(option);
+        CheckBox c = new CheckBox(name, WallscrollSimulator.buttonDescTextSize(), option);
+        checkboxes.add(new ViewInstance<>(new Container<>(c, false)));
         return this;
     }
 
     public boolean checked(String name) {
-        return checkboxes.stream().anyMatch(ci -> ci.view.view().hint.equals(name) && ci.view.view().isChecked());
+        return options.stream().anyMatch(o -> o.id.equals(name) && o.get());
     }
 
     @Override
@@ -62,7 +63,7 @@ public class TitleBar extends View {
             float totalWidth = boxesOffsetX + checkboxes.stream()
                     .mapToInt(ci -> ci.g.width)
                     .sum();
-            float gap = (g.width - totalWidth) / (checkboxes.size() + 1);
+            float gap = (g.width - totalWidth) / (options.size() + 1);
             boxesOffsetX += gap;
             for (ViewInstance<Container<CheckBox>> ci : checkboxes) {
                 ci.position = new PVector(boxesOffsetX, 0);
@@ -77,30 +78,27 @@ public class TitleBar extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
+        if (mouse == null)
+            return;
         if (mouseButton == LEFT) {
-            if (mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
-                for (ViewInstance<Container<CheckBox>> ci : checkboxes) {
-                    if (ci.hover(mouseX, mouseY)) {
-                        PVector pos = ci.mousePos(mouseX, mouseY);
-                        ci.view.mousePressed(mouseButton, (int) pos.x, (int) pos.y);
-                        break;
-                    }
+            for (ViewInstance<Container<CheckBox>> ci : checkboxes) {
+                if (ci.hover(mouse)) {
+                    PVector pos = ci.mousePos(mouse);
+                    ci.v.mousePressed(mouseButton, pos);
+                    break;
                 }
-            } else {
-                WallscrollSimulator.popView();
             }
         }
     }
 
     @Override
-    public boolean update(long time, int mouseX, int mouseY) {
+    public boolean update(long time) {
         for (ViewInstance<Container<CheckBox>> ci : checkboxes) {
-            PVector pos = ci.mousePos(mouseX, mouseY);
-            if (ci.view.update(time, (int) pos.x, (int) pos.y)) {
+            if (ci.v.update(time)) {
                 modified();
             }
         }
-        return super.update(time, mouseX, mouseY);
+        return super.update(time);
     }
 }

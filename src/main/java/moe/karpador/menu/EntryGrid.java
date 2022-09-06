@@ -1,6 +1,5 @@
 package moe.karpador.menu;
 
-import moe.karpador.WallscrollSimulator;
 import moe.karpador.view.View;
 import moe.karpador.view.ViewConstraint;
 import moe.karpador.view.ViewInstance;
@@ -12,7 +11,6 @@ import processing.event.MouseEvent;
 import java.util.List;
 
 import static processing.core.PConstants.LEFT;
-import static processing.core.PConstants.P2D;
 
 public class EntryGrid extends View {
 
@@ -94,38 +92,36 @@ public class EntryGrid extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
-            if (mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
-                mouseY = (int) (mouseY + scrollOffset);
-                for(ViewInstance<View> ei : entries) {
-                    if (ei.hover(mouseX, mouseY)) {
-                        PVector pos = ei.mousePos(mouseX, mouseY);
-                        ei.view.mousePressed(mouseButton, (int) pos.x, (int) pos.y);
-                        break;
-                    }
+            float mouseY = (mouse.y + scrollOffset);
+            for(ViewInstance<View> ei : entries) {
+                PVector offsetPos = new PVector(mouse.x, mouseY);
+                if (ei.hover(offsetPos)) {
+                    PVector pos = ei.mousePos(offsetPos);
+                    ei.v.mousePressed(mouseButton, pos);
+                    break;
                 }
             }
         }
     }
 
     @Override
-    public boolean update(long time, int mouseX, int mouseY) {
+    public boolean update(long time) {
         for (ViewInstance<View> ei : entries) {
-            PVector pos = ei.mousePos(mouseX, mouseY);
-            if (ei.view.update(time, (int) pos.x, (int) pos.y)) {
+            if (ei.v.update(time)) {
                 modified();
             }
         }
-        return super.update(time, mouseX, mouseY);
+        return super.update(time);
     }
 
     @Override
-    public void mouseWheel(MouseEvent e) {
+    public void mouseWheel(int scrollCount, PVector mouse) {
         if (gridG==null || g==null)
             return;
         if (gridG.height > g.height) {
-            float newScrollOffset = PApplet.constrain(scrollOffset + e.getCount() * gridG.height / 10, 0, gridG.height - g.height);
+            float newScrollOffset = PApplet.constrain(scrollOffset + scrollCount * gridG.height / 10, 0, gridG.height - g.height);
             if (newScrollOffset != scrollOffset) {
                 scrollOffset = newScrollOffset;
                 modified();

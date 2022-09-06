@@ -7,6 +7,7 @@ import moe.karpador.view.ViewConstraint;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
+import processing.core.PVector;
 
 public class TextButton extends View {
     public final String text;
@@ -44,11 +45,9 @@ public class TextButton extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == PConstants.LEFT) {
-            if (mouseX >= 0 && mouseX < g.width && mouseY >= 0 && mouseY < g.height) {
-                func.run();
-            }
+            func.run();
         }
     }
 }

@@ -6,26 +6,27 @@ import moe.karpador.view.ViewConstraint;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
+import processing.core.PVector;
 
 public class CheckBox extends View {
 
     public final String hint;
     public final int textSize;
-    private boolean state;
+    private Option option;
     private float boxSide;
 
-    public CheckBox(String hint, int textSize, boolean defaultState) {
+    public CheckBox(String hint, int textSize, Option option) {
         super();
         this.hint = hint;
         this.textSize = textSize;
-        this.state = defaultState;
+        this.option = option;
     }
 
     // HELPERS
     // -----------------------------------------------------------------------------------------------------------------
 
     public boolean isChecked() {
-        return state;
+        return option.get();
     }
 
     // VIEW FUNCTIONS
@@ -43,7 +44,7 @@ public class CheckBox extends View {
         g.noFill();
         g.strokeWeight(2);
         g.rect(1, 1, boxSide - 2, boxSide - 2);
-        if (state) {
+        if (option.get()) {
             g.strokeWeight(4);
             g.line(3, 3, boxSide - 3, boxSide - 3);
             g.line(boxSide - 3, 3, 3, boxSide - 3);
@@ -58,12 +59,29 @@ public class CheckBox extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == PConstants.LEFT) {
-            if (mouseX >= 0 && mouseX < boxSide && mouseY >= 0 && mouseY < boxSide) {
-                state = !state;
+            if (mouse.x >= 0 && mouse.x < boxSide && mouse.y >= 0 && mouse.y < boxSide) {
+                option.toggle();
                 modified();
             }
+        }
+    }
+
+    static class Option {
+        public final String id;
+        private boolean state;
+        public Option(String id, boolean defaultState) {
+            this.id = id;
+            this.state = defaultState;
+        }
+
+        public void toggle() {
+            this.state = !this.state;
+        }
+
+        public boolean get() {
+            return state;
         }
     }
 }

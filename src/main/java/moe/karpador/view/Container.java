@@ -1,7 +1,6 @@
 package moe.karpador.view;
 
 import moe.karpador.WallscrollSimulator;
-import moe.karpador.view.View;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
@@ -13,15 +12,17 @@ public class Container<T extends View> extends View {
     public final ViewInstance<T> viewi;
 
     private final Alignment alignment;
+    private final boolean closeOnOutsidePress;
 
-    public Container(T view, Alignment alignment) {
+    public Container(T view, boolean closeOnOutsidePress, Alignment alignment) {
         super();
         this.viewi = new ViewInstance<>(view);
         this.alignment = alignment;
+        this.closeOnOutsidePress = closeOnOutsidePress;
     }
 
-    public Container(T view) {
-        this(view, Alignment.CENTER);
+    public Container(T view, boolean closeOnOutsidePress) {
+        this(view, closeOnOutsidePress, Alignment.CENTER);
     }
 
     // HELPERS
@@ -44,7 +45,7 @@ public class Container<T extends View> extends View {
     }
 
     public T view() {
-        return viewi.view;
+        return viewi.v;
     }
 
     // VIEW FUNCTIONS
@@ -68,35 +69,45 @@ public class Container<T extends View> extends View {
         return g;
     }
 
-    public boolean update(long time, int mouseX, int mouseY) {
-        PVector pos = viewi.mousePos(mouseX, mouseY);
-        if (viewi.view.update(time, (int) pos.x, (int) pos.y)) {
+    public boolean update(long time) {
+        if (viewi.v.update(time)) {
             modified();
         }
-        return super.update(time, mouseX, mouseY);
+        return super.update(time);
     }
 
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
-        PVector pos = viewi.mousePos(mouseX, mouseY);
-        viewi.view.mousePressed(mouseButton, (int) pos.x, (int) pos.y);
+    public void mousePressed(int mouseButton, PVector mouse) {
+        PVector pos = viewi.mousePos(mouse);
+        if (pos != null) {
+            viewi.v.mousePressed(mouseButton, pos);
+        } else if (closeOnOutsidePress) {
+            WallscrollSimulator.popView();
+        }
     }
 
-    public void mouseReleased(int mouseButton, int mouseX, int mouseY) {
-        PVector pos = viewi.mousePos(mouseX, mouseY);
-        viewi.view.mouseReleased(mouseButton, (int) pos.x, (int) pos.y);
+    public void mouseReleased(int mouseButton, PVector mouse) {
+        PVector pos = viewi.mousePos(mouse);
+        if (pos != null) {
+            viewi.v.mouseReleased(mouseButton, pos);
+        }
     }
 
-    public void mouseDragged(int mouseButton, int mouseX, int mouseY, int pmouseX, int pmouseY) {
-        PVector pos = viewi.mousePos(mouseX, mouseY);
-        PVector ppos = viewi.mousePos(pmouseX, pmouseY);
-        viewi.view.mouseDragged(mouseButton, (int) pos.x, (int) pos.y, (int) ppos.x, (int) ppos.y);
+    public void mouseDragged(int mouseButton, PVector mouse, PVector pmouse) {
+        PVector pos = viewi.mousePos(mouse);
+        PVector ppos = viewi.mousePos(pmouse);
+        if (pos != null && ppos != null) {
+            viewi.v.mouseDragged(mouseButton, pos, ppos);
+        }
     }
 
-    public void mouseWheel(MouseEvent e) {
-        viewi.view.mouseWheel(e);
+    public void mouseWheel(int scrollCount, PVector mouse) {
+        PVector pos = viewi.mousePos(mouse);
+        viewi.v.mouseWheel(scrollCount, pos);
     }
 
-    public void keyPressed(int key, int keyCode) {
-        viewi.view.keyPressed(key, keyCode);
+    public void keyPressed(int key, int keyCode, PVector mouse) {
+        PVector pos = viewi.mousePos(mouse);
+        viewi.v.keyPressed(key, keyCode, pos);
     }
+
 }

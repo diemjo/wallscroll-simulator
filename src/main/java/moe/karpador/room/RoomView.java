@@ -57,40 +57,42 @@ public class RoomView extends View {
     }
 
     @Override
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
-            selectWallscroll(mouseX, mouseY);
+            selectWallscroll(mouse);
         }
     }
 
     @Override
-    public void mouseReleased(int mouseButton, int mouseX, int mouseY) {
+    public void mouseReleased(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
             this.selected = null;
         }
     }
 
     @Override
-    public void mouseDragged(int mouseButton, int mouseX, int mouseY, int pmouseX, int pmouseY) {
+    public void mouseDragged(int mouseButton, PVector mouse, PVector pmouse) {
         if (mouseButton == RIGHT) {
-            moveCamera(mouseX, mouseY, pmouseX, pmouseY);
+            moveCamera(mouse, pmouse);
             modified();
         } else if (mouseButton == LEFT) {
-            if (moveSelected(mouseX, mouseY, pmouseX, pmouseY)) {
+            if (moveSelected(mouse, pmouse)) {
                 modified();
             }
         }
     }
 
     @Override
-    public void keyPressed(int key, int keyCode) {
+    public void keyPressed(int key, int keyCode, PVector mouse) {
         switch (keyCode) {
             case ESC -> {
-                WallscrollSimulator.pushView(new Container<>(new Menu(this)));
+                WallscrollSimulator.pushView(new Container<>(new Menu(this), true));
                 WallscrollSimulator.preventEscape();
             }
             case 147 -> { //DELETE
-                selectWallscroll(mouseX, mouseY);
+                if (mouse == null)
+                    return;
+                selectWallscroll(mouse);
                 if (selected!=null) {
                     room.removeWallscroll(selected);
                     selected = null;
@@ -116,11 +118,11 @@ public class RoomView extends View {
         modified();
     }
 
-    public void selectWallscroll(int mouseX, int mouseY) {
+    public void selectWallscroll(PVector mouse) {
         g.pushMatrix();
         setCamera();
         for (Wallscroll wallscroll : room.wallscrolls) {
-            PVector uv = getWallscrollUV(wallscroll, mouseX, mouseY);
+            PVector uv = getWallscrollUV(wallscroll, mouse);
             if (uv!=null) {
                 this.selected = wallscroll;
                 this.selectedUV = uv;
@@ -130,14 +132,13 @@ public class RoomView extends View {
         g.popMatrix();
     }
 
-    private PVector getWallscrollUV(Wallscroll wallscroll, int mouseX, int mouseY) {
-        PVector mouseV = new PVector(mouseX, mouseY);
+    private PVector getWallscrollUV(Wallscroll wallscroll, PVector mouse) {
         PVector[] vertices = wallscroll.getVertices(room.getWallPos(wallscroll.side));
         for (PVector vertex : vertices) {
             vertex.set(g.screenX(vertex.x, vertex.y, vertex.z), g.screenY(vertex.x, vertex.y, vertex.z));
         }
         if (Arrays.stream(vertices).filter(this::invisible).count() >= 2) return null;
-        return uxFromQuad(mouseV, vertices[0], vertices[1], vertices[2], vertices[3]);
+        return uxFromQuad(mouse, vertices[0], vertices[1], vertices[2], vertices[3]);
     }
 
     private boolean invisible(PVector screenPos) {
@@ -165,13 +166,13 @@ public class RoomView extends View {
         return ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)) / dist(a.x, a.y, b.x, b.y);
     }
 
-    private boolean moveSelected(int mouseX, int mouseY, int pmouseX, int pmouseY) {
+    private boolean moveSelected(PVector mouse, PVector pmouse) {
         if (selected == null) return false;
         g.pushMatrix();
         setCamera();
-        PVector uv = getWallscrollUV(selected, mouseX, mouseY);
+        PVector uv = getWallscrollUV(selected, mouse);
         PVector newPos = uv == null ?
-                new PVector(selected.position.x + mouseX - pmouseX, selected.position.y + mouseY - pmouseY) :
+                new PVector(selected.position.x + mouse.x - pmouse.x, selected.position.y + mouse.y - pmouse.y) :
                 new PVector(selected.position.x + (uv.x - selectedUV.x)*selected.format.width, selected.position.y - (uv.y - selectedUV.y)*selected.format.height);
         if (newPos.x < 0) {
             numAttempts++;
@@ -206,9 +207,9 @@ public class RoomView extends View {
         return true;
     }
 
-    public void moveCamera(int mouseX, int mouseY, int pmouseX, int pmouseY) {
-        float xdiff = (mouseX - pmouseX) / 35.f;
-        float ydiff = (mouseY - pmouseY) / 35.f;
+    public void moveCamera(PVector mouse, PVector pmouse) {
+        float xdiff = (mouse.x - pmouse.x) / 35.f;
+        float ydiff = (mouse.y - pmouse.y) / 35.f;
         phi = (phi - xdiff + TWO_PI) % TWO_PI;
         theta = theta + ydiff;
         if (theta < 0.01) theta = 0.01f;

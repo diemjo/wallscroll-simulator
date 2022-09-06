@@ -10,7 +10,6 @@ import processing.event.MouseEvent;
 public abstract class View {
     private final String renderer;
     protected PGraphics g;
-    protected int mouseX, mouseY;
     private boolean modified = true;
 
     protected View(String renderer) {
@@ -47,31 +46,27 @@ public abstract class View {
         }
     }
 
-
-
-    public boolean update(long time, int mouseX, int mouseY) {
-        this.mouseX = mouseX;
-        this.mouseY = mouseY;
+    public boolean update(long time) {
         return modified;
     }
 
-    public void mousePressed(int mouseButton, int mouseX, int mouseY) {
+    public void mousePressed(int mouseButton, PVector mouse) {
 
     }
 
-    public void mouseReleased(int mouseButton, int mouseX, int mouseY) {
+    public void mouseReleased(int mouseButton, PVector mouse) {
 
     }
 
-    public void mouseDragged(int mouseButton, int mouseX, int mouseY, int pmouseX, int pmouseY) {
+    public void mouseDragged(int mouseButton, PVector mouse, PVector pmouse) {
 
     }
 
-    public void mouseWheel(MouseEvent e) {
+    public void mouseWheel(int scrollCount, PVector mouse) {
 
     }
 
-    public void keyPressed(int key, int keyCode) {
+    public void keyPressed(int key, int keyCode, PVector mouse) {
         if (keyCode== PConstants.ESC) {
             WallscrollSimulator.preventEscape();
             WallscrollSimulator.popView();

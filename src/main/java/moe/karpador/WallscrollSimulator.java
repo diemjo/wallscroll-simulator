@@ -207,10 +207,9 @@ public class WallscrollSimulator extends PApplet {
 
     @Override
     public void draw() {
-        View top = views.get(views.size()-1);
-
+        View top = views.get(views.size() - 1);
         long now = System.nanoTime();
-        boolean modified = top.update(now-nanos, mouseX, mouseY);
+        boolean modified = top.update(now - nanos);
         nanos = now;
 
         background(255);
@@ -225,30 +224,34 @@ public class WallscrollSimulator extends PApplet {
     @Override
     public void mousePressed() {
         View top = views.get(views.size()-1);
-        top.mousePressed(mouseButton, mouseX, mouseY);
+        top.mousePressed(mouseButton, new PVector(mouseX, mouseY));
     }
 
     @Override
     public void mouseReleased() {
         View top = views.get(views.size()-1);
-        top.mouseReleased(mouseButton, mouseX, mouseY);
+        top.mouseReleased(mouseButton, new PVector(mouseX, mouseY));
     }
 
     @Override
     public void mouseDragged() {
         View top = views.get(views.size()-1);
-        top.mouseDragged(mouseButton, mouseX, mouseY, pmouseX, pmouseY);
+        top.mouseDragged(mouseButton, new PVector(mouseX, mouseY), new PVector(pmouseX, pmouseY));
     }
 
     @Override
     public void mouseWheel(MouseEvent event) {
-        View top = views.get(views.size()-1);
-        top.mouseWheel(event);
+        mouseWheel(event.getCount(), new PVector(mouseX, mouseY));
+    }
+
+    public void mouseWheel(int scrollCount, PVector mouse) {
+        View top = views.get(views.size() - 1);
+        top.mouseWheel(scrollCount, mouse);
     }
 
     @Override
     public void keyPressed() {
         View top = views.get(views.size()-1);
-        top.keyPressed(key, keyCode);
+        top.keyPressed(key, keyCode, new PVector(mouseX, mouseY));
     }
 }
