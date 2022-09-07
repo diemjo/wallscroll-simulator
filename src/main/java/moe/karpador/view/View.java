@@ -38,7 +38,9 @@ public abstract class View {
 
     protected PGraphics clearG(PGraphics g, int w, int h) {
         if (g==null || g.width!=w || g.height!=h) {
-            return WallscrollSimulator.createPGraphics(w, h, renderer);
+            PGraphics pg = WallscrollSimulator.createPGraphics(w, h, renderer);
+            pg.beginDraw();
+            return pg;
         } else {
             g.beginDraw();
             g.clear();
@@ -66,10 +68,12 @@ public abstract class View {
 
     }
 
-    public void keyPressed(int key, int keyCode, PVector mouse) {
+    public boolean keyPressed(int key, int keyCode, PVector mouse) {
         if (keyCode== PConstants.ESC) {
             WallscrollSimulator.preventEscape();
             WallscrollSimulator.popView();
+            return true;
         }
+        return false;
     }
 }

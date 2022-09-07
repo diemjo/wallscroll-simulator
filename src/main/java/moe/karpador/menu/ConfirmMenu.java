@@ -24,8 +24,8 @@ public class ConfirmMenu extends View {
         this.text = text;
         this.textSize = textSize;
         confirm = new ViewInstance<>(new TextButton("Confirm", () -> {
-            func.run();
             WallscrollSimulator.popView();
+            func.run();
         }, textSize));
         cancel = new ViewInstance<>(new TextButton("Cancel", () -> {
             WallscrollSimulator.popView();
@@ -34,8 +34,8 @@ public class ConfirmMenu extends View {
 
     @Override
     protected PGraphics build(ViewConstraint constraint) {
-        float confirmWidth = WallscrollSimulator.getTextWidth(confirm.v.text, confirm.v.textSize) + 4;
-        float cancelWidth = WallscrollSimulator.getTextWidth(cancel.v.text, cancel.v.textSize) + 4;
+        float confirmWidth = WallscrollSimulator.getTextWidth(confirm.v.text, confirm.v.textSize) + 8;
+        float cancelWidth = WallscrollSimulator.getTextWidth(cancel.v.text, cancel.v.textSize) + 8;
         float textWidth = WallscrollSimulator.getTextWidth(text, textSize);
         int padding = (int) min(50, textSize*1.5f);
         float maxWidth = max(confirmWidth + cancelWidth, textWidth);
@@ -44,8 +44,8 @@ public class ConfirmMenu extends View {
         g = clearG(g, (int) maxWidth + 2 * padding, (int) maxHeight);
         g.beginDraw();
 
-        confirm.draw(ViewConstraint.max(new PVector(max(confirmWidth, confirmWidth + (maxWidth - (confirmWidth + cancelWidth))/2), 2*textSize)));
-        cancel.draw(ViewConstraint.max(new PVector(max(cancelWidth, cancelWidth + (maxWidth - (confirmWidth + cancelWidth))/2), 2*textSize)));
+        confirm.draw(ViewConstraint.exact(new PVector(max(confirmWidth, confirmWidth + (maxWidth - (confirmWidth + cancelWidth))/2), 2*textSize-4)));
+        cancel.draw(ViewConstraint.exact(new PVector(max(cancelWidth, cancelWidth + (maxWidth - (confirmWidth + cancelWidth))/2), 2*textSize-4)));
 
         g.fill(255, 200, 230);
         g.strokeWeight(4);

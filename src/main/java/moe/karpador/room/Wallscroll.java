@@ -54,7 +54,7 @@ public class Wallscroll {
         WallSide side = WallSide.fromName((String) root.get("side"));
         List<Double> position = (List<Double>) root.get("position");
         if (position.size()!=2) throw new IllegalArgumentException("Position argument expected two integer values");
-        Wallscroll wallscroll = new Wallscroll(path, WallscrollSimulator.getWallscrolls().get(path), side);
+        Wallscroll wallscroll = new Wallscroll(path, WallscrollSimulator.getWallscrolls().get(path.toString()), side);
         wallscroll.position.set(position.get(0).intValue(), position.get(1).intValue());
         return wallscroll;
     }
@@ -62,7 +62,7 @@ public class Wallscroll {
     public Map<String, Object> toYaml() {
         Yaml yaml = new Yaml();
         Map<String, Object> root = new HashMap<>();
-        root.put("path", path);
+        root.put("path", path.toString());
         root.put("side", side.toName());
         root.put("position", Arrays.asList(position.x, position.y));
         return root;

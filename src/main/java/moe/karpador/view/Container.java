@@ -105,9 +105,9 @@ public class Container<T extends View> extends View {
         viewi.v.mouseWheel(scrollCount, pos);
     }
 
-    public void keyPressed(int key, int keyCode, PVector mouse) {
+    public boolean keyPressed(int key, int keyCode, PVector mouse) {
         PVector pos = viewi.mousePos(mouse);
-        viewi.v.keyPressed(key, keyCode, pos);
+        return viewi.v.keyPressed(key, keyCode, pos);
     }
 
 }

@@ -21,7 +21,7 @@ public class ViewInstance<T extends View> {
         if (g == null || mouse == null) {
             return false;
         }
-        return mouse.x >= position.x && mouse.y < position.x + g.width && mouse.y >= position.y && mouse.y < position.y + g.height;
+        return mouse.x >= position.x && mouse.x < position.x + g.width && mouse.y >= position.y && mouse.y < position.y + g.height;
     }
 
     public PVector mousePos(PVector mouse) {

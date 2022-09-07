@@ -1,9 +1,9 @@
 package moe.karpador.room;
 
 import moe.karpador.WallscrollSimulator;
+import moe.karpador.menu.Menu;
 import moe.karpador.view.Container;
 import moe.karpador.view.View;
-import moe.karpador.menu.Menu;
 import moe.karpador.view.ViewConstraint;
 import processing.core.PGraphics;
 import processing.core.PVector;
@@ -83,7 +83,7 @@ public class RoomView extends View {
     }
 
     @Override
-    public void keyPressed(int key, int keyCode, PVector mouse) {
+    public boolean keyPressed(int key, int keyCode, PVector mouse) {
         switch (keyCode) {
             case ESC -> {
                 WallscrollSimulator.pushView(new Container<>(new Menu(this), true));
@@ -91,7 +91,7 @@ public class RoomView extends View {
             }
             case 147 -> { //DELETE
                 if (mouse == null)
-                    return;
+                    return false;
                 selectWallscroll(mouse);
                 if (selected!=null) {
                     room.removeWallscroll(selected);
@@ -100,9 +100,10 @@ public class RoomView extends View {
                 }
             }
             default -> {
-
+                return false;
             }
         }
+        return true;
     }
 
     // HELPERS

@@ -28,7 +28,7 @@ public class TextButton extends View {
     @Override
     protected PGraphics build(ViewConstraint constraint) {
         g = clearG(g,
-                (int) PApplet.max(constraint.maxSize.x, WallscrollSimulator.getTextWidth(text, textSize)),
+                (int) PApplet.max(constraint.minSize.x, WallscrollSimulator.getTextWidth(text, textSize) + textSize/2),
                 (int) (PApplet.max(constraint.minSize.y, textSize * 1.5f)));
         g.beginDraw();
 
