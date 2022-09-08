@@ -39,7 +39,10 @@ public class FileBrowser extends View {
             case WallscrollBrowser -> {
                 this.wallscrolls = WallscrollSimulator.getWallscrolls().entrySet().stream()
                         .map(e -> new Wallscroll(Path.of(e.getKey()), e.getValue()))
-                        .map(w -> new WallscrollEntry(w, textSize, () -> roomView.placeWallscroll(w.copy())))
+                        .map(w -> new WallscrollEntry(w, textSize, () -> {
+                            roomView.placeWallscroll(w.copy());
+                            WallscrollSimulator.popView();
+                        }))
                                 .collect(Collectors.toList());
                 this.configs = null;
                 this.titleBar = new ViewInstance<>(new TitleBar("Select Wallscroll", WallscrollSimulator.viewTitleTextSize())
@@ -55,7 +58,10 @@ public class FileBrowser extends View {
                 this.wallscrolls = null;
                 WallscrollSimulator.loadConfigs();
                 this.configs = WallscrollSimulator.getConfigs().stream()
-                        .map(pa -> new ConfigEntry(pa, textSize, () -> roomView.loadWallscrolls(pa)))
+                        .map(pa -> new ConfigEntry(pa, textSize, () -> {
+                            roomView.loadWallscrolls(pa);
+                            WallscrollSimulator.popView();
+                        }))
                         .collect(Collectors.toList());
                 this.titleBar = new ViewInstance<>(new TitleBar("Load Wallscroll Config", WallscrollSimulator.viewTitleTextSize()));
             }
