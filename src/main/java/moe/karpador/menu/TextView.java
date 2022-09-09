@@ -29,9 +29,9 @@ public class TextView extends View {
 
     @Override
     protected PGraphics build(ViewConstraint constraint) {
-        float textWidth = WallscrollSimulator.getTextWidth(text, textSize) * 1.1f;
+        float textWidth = WallscrollSimulator.getTextWidth(text, textSize) * 1.05f;
         int lines = multiline ? PApplet.ceil(textWidth / constraint.maxSize.x) : 1;
-        int height = (int) (lines * textSize * 1.6);
+        int height = (int) (lines * textSize * 1.7);
 
         g = clearG(g,
                 (int) PApplet.max(constraint.minSize.x, PApplet.min(textWidth, constraint.maxSize.x)),
@@ -46,7 +46,7 @@ public class TextView extends View {
         g.textSize(textSize);
         if (multiline) {
             g.textAlign(PConstants.LEFT, PConstants.TOP);
-            g.text(text, textWidth/lines*0.05f, 1, g.width - textWidth/lines*0.1f, g.height - 2);
+            g.text(text, textWidth/lines*0.025f, 1, g.width - textWidth/lines*0.05f, g.height - 2);
         } else {
             g.textAlign(PConstants.CENTER, PConstants.CENTER);
             g.text(text, g.width / 2f, g.height / 2f);
