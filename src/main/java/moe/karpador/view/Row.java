@@ -4,19 +4,16 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 
-public class Row<T extends View> extends View {
-    public enum SpacingType {
-        EQUAL_INNER_SPACING,
-        EQUAL_SPACING,
-        NO_SPACING,
-    }
-
-    private final List<ViewInstance<T>> children;
+public class Row extends View implements Iterable {
+    private final List<ViewInstance<View>> children;
     private final SpacingType spacingType;
 
-    public Row(List<T> children, SpacingType spacingType) {
+    public Row(List<View> children, SpacingType spacingType) {
         this.children = children.stream()
                 .map(ViewInstance::new)
                 .toList();
@@ -31,7 +28,7 @@ public class Row<T extends View> extends View {
         }
         int totalWidth = 0;
         int maxHeight = 0;
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             child.draw(constraint);
             totalWidth += child.g.width;
             maxHeight = PApplet.max(maxHeight, child.g.height);
@@ -55,7 +52,7 @@ public class Row<T extends View> extends View {
                 offset = children.size() > 1 ? 0 : (constraint.maxSize.x - totalWidth) / 2;
             }
         }
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             child.position = new PVector(offset, (g.height - child.g.height) / 2);
             offset += child.g.width;
             offset += spacing;
@@ -67,7 +64,7 @@ public class Row<T extends View> extends View {
 
     @Override
     public void mousePressed(int mouseButton, PVector mouse) {
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             PVector pos = child.mousePos(mouse);
             if (pos != null) {
                 child.v.mousePressed(mouseButton, pos);
@@ -77,7 +74,7 @@ public class Row<T extends View> extends View {
     }
 
     public void mouseReleased(int mouseButton, PVector mouse) {
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             PVector pos = child.mousePos(mouse);
             if (pos != null) {
                 child.v.mouseReleased(mouseButton, pos);
@@ -87,7 +84,7 @@ public class Row<T extends View> extends View {
     }
 
     public void mouseDragged(int mouseButton, PVector mouse, PVector pmouse) {
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             PVector pos = child.mousePos(mouse);
             PVector ppos = child.mousePos(pmouse);
             if (pos != null && ppos != null) {
@@ -98,7 +95,7 @@ public class Row<T extends View> extends View {
     }
 
     public void mouseWheel(int scrollCount, PVector mouse) {
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             PVector pos = child.mousePos(mouse);
             if (pos != null) {
                 child.v.mouseWheel(scrollCount, pos);
@@ -108,7 +105,7 @@ public class Row<T extends View> extends View {
     }
 
     public boolean keyPressed(int key, int keyCode, PVector mouse) {
-        for (ViewInstance<T> child : children) {
+        for (ViewInstance<View> child : children) {
             PVector pos = child.mousePos(mouse);
             if (child.v.keyPressed(key, keyCode, pos)) {
                 return true;
@@ -123,5 +120,25 @@ public class Row<T extends View> extends View {
             modified();
         }
         return super.update(time);
+    }
+
+
+    public List<View> children() {
+        return children.stream().map(c -> c.v).toList();
+    }
+
+    @Override
+    public Iterator<View> iterator() {
+        return children.stream().map(c -> c.v).iterator();
+    }
+
+    @Override
+    public void forEach(Consumer action) {
+        children.stream().map(c -> c.v).forEach(action);
+    }
+
+    @Override
+    public Spliterator<View> spliterator() {
+        return children.stream().map(c -> c.v).spliterator();
     }
 }

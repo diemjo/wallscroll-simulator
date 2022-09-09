@@ -12,21 +12,21 @@ import java.util.List;
 
 import static processing.core.PConstants.LEFT;
 
-public class EntryGrid extends View {
+public class EntryGrid<T extends View> extends View {
 
     final int cols;
-    private List<ViewInstance<View>> entries;
+    private List<ViewInstance<T>> entries;
     private PGraphics gridG;
     private boolean entriesChanged;
     private float scrollOffset = 0f;
-    private static float scrollBarWidth = 10f;
+    private static final float scrollBarWidth = 10f;
 
     public EntryGrid(int cols) {
         this.cols = cols;
         this.entriesChanged = true;
     }
 
-    public void setEntries(List<View> entries) {
+    public void setEntries(List<T> entries) {
         this.entries = entries.stream().map(ViewInstance::new).toList();
         this.scrollOffset = 0f;
         this.entriesChanged = true;
@@ -39,26 +39,22 @@ public class EntryGrid extends View {
             return gridG;
         }
         float width = constraint.maxSize.x / cols;
-        int col;
-        float maxHeight;
         float totalHeight = 0;
-        for (int i=0; i<entries.size(); i++) {
-            col = i % cols;
-            if (i % cols == 0) {
-                maxHeight = constraint.maxSize.y;
-            } else {
-                maxHeight = entries.get(i-1).g.height;
+        for (int i = 0; i < entries.size(); i+=cols) {
+            float maxHeight = 0;
+            for (int col = 0; col < cols && i + col < entries.size(); col++) {
+                entries.get(i + col).draw(ViewConstraint.with(new PVector(width, 0), new PVector(width, constraint.maxSize.y)));
+                maxHeight = PApplet.max(maxHeight, entries.get(i + col).g.height);
             }
-            entries.get(i).draw(ViewConstraint.with(new PVector(width, 0), new PVector(width, maxHeight)));
-            if (i % cols == 0) {
-                totalHeight += entries.get(i).g.height;
+            for (int col = 0; col < cols && i + col < entries.size(); col++) {
+                entries.get(i + col).position = new PVector(col * width, totalHeight);
             }
-            entries.get(i).position = new PVector(col * width, totalHeight - entries.get(i).g.height);
+            totalHeight += maxHeight;
         }
 
         gridG = clearG(gridG, (int) constraint.maxSize.x, (int) totalHeight);
         gridG.beginDraw();
-        for(ViewInstance<View> entry : entries) {
+        for(ViewInstance<T> entry : entries) {
             gridG.image(entry.g, entry.position.x, entry.position.y);
         }
         gridG.endDraw();
@@ -95,7 +91,7 @@ public class EntryGrid extends View {
     public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
             float mouseY = (mouse.y + scrollOffset);
-            for(ViewInstance<View> ei : entries) {
+            for(ViewInstance<T> ei : entries) {
                 PVector offsetPos = new PVector(mouse.x, mouseY);
                 if (ei.hover(offsetPos)) {
                     PVector pos = ei.mousePos(offsetPos);
@@ -108,7 +104,7 @@ public class EntryGrid extends View {
 
     @Override
     public boolean update(long time) {
-        for (ViewInstance<View> ei : entries) {
+        for (ViewInstance<T> ei : entries) {
             if (ei.v.update(time)) {
                 modified();
             }

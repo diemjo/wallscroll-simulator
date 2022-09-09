@@ -1,6 +1,7 @@
 package moe.karpador.menu;
 
 import moe.karpador.WallscrollSimulator;
+import moe.karpador.view.Button;
 import moe.karpador.view.View;
 import moe.karpador.room.RoomView;
 import moe.karpador.room.Wallscroll;
@@ -23,8 +24,8 @@ public class FileBrowser extends View {
 
     private final BrowserType type;
 
-    private final List<ConfigEntry> configs;
-    private final List<WallscrollEntry> wallscrolls;
+    private final List<Button<ConfigEntry>> configs;
+    private final List<Button<WallscrollEntry>> wallscrolls;
     private final ViewInstance<EntryGrid> grid;
 
     private final ViewInstance<TitleBar> titleBar;
@@ -39,31 +40,34 @@ public class FileBrowser extends View {
             case WallscrollBrowser -> {
                 this.wallscrolls = WallscrollSimulator.getWallscrolls().entrySet().stream()
                         .map(e -> new Wallscroll(Path.of(e.getKey()), e.getValue()))
-                        .map(w -> new WallscrollEntry(w, textSize, () -> {
+                        .map(w -> new Button<>(new WallscrollEntry(w, textSize), () -> {
                             roomView.placeWallscroll(w.copy());
                             WallscrollSimulator.popView();
                         }))
                                 .collect(Collectors.toList());
                 this.configs = null;
-                this.titleBar = new ViewInstance<>(new TitleBar("Select Wallscroll", WallscrollSimulator.viewTitleTextSize())
-                        .withCheckbox("portrait", true)
-                        .withCheckbox("landscape", true)
-                        .withCheckbox("B0", true)
-                        .withCheckbox("B1", true)
-                        .withCheckbox("B2", true)
-                        .withCheckbox("Long", true)
-                        .withCheckbox("Only safe", true));
+                this.titleBar = new ViewInstance<>(
+                        new TitleBar("Select Wallscroll", WallscrollSimulator.viewTitleTextSize(), List.of(
+                                new CheckBox.Option("portrait", true),
+                                new CheckBox.Option("landscape", true),
+                                new CheckBox.Option("B0", true),
+                                new CheckBox.Option("B1", true),
+                                new CheckBox.Option("B2", true),
+                                new CheckBox.Option("Long", true),
+                                new CheckBox.Option("Only safe", true))
+                        )
+                );
             }
             case ConfigBrowser -> {
                 this.wallscrolls = null;
                 WallscrollSimulator.loadConfigs();
                 this.configs = WallscrollSimulator.getConfigs().stream()
-                        .map(pa -> new ConfigEntry(pa, textSize, () -> {
+                        .map(pa -> new Button<>(new ConfigEntry(pa, textSize), () -> {
                             roomView.loadWallscrolls(pa);
                             WallscrollSimulator.popView();
                         }))
                         .collect(Collectors.toList());
-                this.titleBar = new ViewInstance<>(new TitleBar("Load Wallscroll Config", WallscrollSimulator.viewTitleTextSize()));
+                this.titleBar = new ViewInstance<>(new TitleBar("Load Wallscroll Config", WallscrollSimulator.viewTitleTextSize(), List.of()));
             }
             default -> throw new IllegalStateException("Unexpected value: " + type);
         }
@@ -73,7 +77,7 @@ public class FileBrowser extends View {
         switch (type) {
             case WallscrollBrowser -> {
                 List<View> currentWallscrolls = wallscrolls.stream()
-                        .filter(w -> switch (w.wallscroll.format) {
+                        .filter(w -> switch (w.view().wallscroll.format) {
                             case B2P -> titleBar.v.checked("B2") && titleBar.v.checked("portrait");
                             case B2L -> titleBar.v.checked("B2") && titleBar.v.checked("landscape");
                             case B1P -> titleBar.v.checked("B1") && titleBar.v.checked("portrait");
@@ -81,7 +85,7 @@ public class FileBrowser extends View {
                             case B0P -> titleBar.v.checked("B0") && titleBar.v.checked("portrait");
                             case LONG -> titleBar.v.checked("Long") && titleBar.v.checked("portrait");
                         })
-                        .filter(w -> switch (w.wallscroll.rating) {
+                        .filter(w -> switch (w.view().wallscroll.rating) {
                             case SAFE -> true;
                             case EXPLICIT -> !titleBar.v.checked("Only safe");
                         })
@@ -102,7 +106,7 @@ public class FileBrowser extends View {
     protected PGraphics build(ViewConstraint constraint) {
         float width = max(constraint.minSize.x, constraint.maxSize.x * 4 / 5);
         float height = max(constraint.minSize.y, constraint.maxSize.y * 4 / 5);
-        float titleHeight = titleBar.v.textSize*3;
+        float titleHeight = titleBar.v.textSize*2;
         titleBar.draw(ViewConstraint.max(new PVector(width, titleHeight)));
         titleBar.position = new PVector(0, 0);
         grid.draw(ViewConstraint.max(new PVector(width, height - titleHeight)));

@@ -4,19 +4,18 @@ import moe.karpador.WallscrollSimulator;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
-import processing.event.MouseEvent;
 
 public class Container<T extends View> extends View {
     protected enum Alignment { CENTER, CENTER_LEFT, CENTER_RIGHT, TOP_CENTER, BOTTOM_CENTER, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 
-    public final ViewInstance<T> viewi;
+    private final ViewInstance<T> view;
 
     private final Alignment alignment;
     private final boolean closeOnOutsidePress;
 
     public Container(T view, boolean closeOnOutsidePress, Alignment alignment) {
         super();
-        this.viewi = new ViewInstance<>(view);
+        this.view = new ViewInstance<>(view);
         this.alignment = alignment;
         this.closeOnOutsidePress = closeOnOutsidePress;
     }
@@ -45,7 +44,7 @@ public class Container<T extends View> extends View {
     }
 
     public T view() {
-        return viewi.v;
+        return view.v;
     }
 
     // VIEW FUNCTIONS
@@ -53,61 +52,61 @@ public class Container<T extends View> extends View {
 
     @Override
     public PGraphics build(ViewConstraint constraint) {
-        viewi.draw(ViewConstraint.max(constraint.maxSize));
-        if (constraint.matchesSize(new PVector(viewi.g.width, viewi.g.height))) {
-            viewi.position = new PVector(0, 0);
-            g = viewi.g;
+        view.draw(ViewConstraint.max(constraint.maxSize));
+        if (constraint.matchesSize(new PVector(view.g.width, view.g.height))) {
+            view.position = new PVector(0, 0);
+            g = view.g;
         } else {
-            int cwidth = PApplet.max(viewi.g.width, (int) constraint.minSize.x);
-            int cheight = PApplet.max(viewi.g.height, (int) constraint.minSize.y);
+            int cwidth = PApplet.max(view.g.width, (int) constraint.minSize.x);
+            int cheight = PApplet.max(view.g.height, (int) constraint.minSize.y);
             g = clearG(g, cwidth, cheight);
             g.beginDraw();
-            viewi.position = calculateViewPosition(new PVector(viewi.g.width, viewi.g.height));
-            g.image(viewi.g, viewi.position.x, viewi.position.y);
+            view.position = calculateViewPosition(new PVector(view.g.width, view.g.height));
+            g.image(view.g, view.position.x, view.position.y);
             g.endDraw();
         }
         return g;
     }
 
     public boolean update(long time) {
-        if (viewi.v.update(time)) {
+        if (view.v.update(time)) {
             modified();
         }
         return super.update(time);
     }
 
     public void mousePressed(int mouseButton, PVector mouse) {
-        PVector pos = viewi.mousePos(mouse);
+        PVector pos = view.mousePos(mouse);
         if (pos != null) {
-            viewi.v.mousePressed(mouseButton, pos);
+            view.v.mousePressed(mouseButton, pos);
         } else if (closeOnOutsidePress) {
             WallscrollSimulator.popView();
         }
     }
 
     public void mouseReleased(int mouseButton, PVector mouse) {
-        PVector pos = viewi.mousePos(mouse);
+        PVector pos = view.mousePos(mouse);
         if (pos != null) {
-            viewi.v.mouseReleased(mouseButton, pos);
+            view.v.mouseReleased(mouseButton, pos);
         }
     }
 
     public void mouseDragged(int mouseButton, PVector mouse, PVector pmouse) {
-        PVector pos = viewi.mousePos(mouse);
-        PVector ppos = viewi.mousePos(pmouse);
+        PVector pos = view.mousePos(mouse);
+        PVector ppos = view.mousePos(pmouse);
         if (pos != null && ppos != null) {
-            viewi.v.mouseDragged(mouseButton, pos, ppos);
+            view.v.mouseDragged(mouseButton, pos, ppos);
         }
     }
 
     public void mouseWheel(int scrollCount, PVector mouse) {
-        PVector pos = viewi.mousePos(mouse);
-        viewi.v.mouseWheel(scrollCount, pos);
+        PVector pos = view.mousePos(mouse);
+        view.v.mouseWheel(scrollCount, pos);
     }
 
     public boolean keyPressed(int key, int keyCode, PVector mouse) {
-        PVector pos = viewi.mousePos(mouse);
-        return viewi.v.keyPressed(key, keyCode, pos);
+        PVector pos = view.mousePos(mouse);
+        return view.v.keyPressed(key, keyCode, pos);
     }
 
 }

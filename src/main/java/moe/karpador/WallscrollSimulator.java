@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WallscrollSimulator extends PApplet {
     private static final Pattern WALLSCROLL_CONFIG_PATTERN = Pattern.compile("wallscrolls.*\\.yaml");
@@ -29,6 +30,8 @@ public class WallscrollSimulator extends PApplet {
     private final Path wallscrollImagesPath;
     private Map<String, PImage> wallscrolls;
     private List<Path> configs;
+
+    private PImage configIcon;
 
     public WallscrollSimulator(String[] args) {
         String tempRoom = "room.yaml";
@@ -120,14 +123,23 @@ public class WallscrollSimulator extends PApplet {
         return wallscrollSimulator.configs;
     }
 
+    public static PImage getConfigIcon() {
+        return wallscrollSimulator.configIcon;
+    }
+
     // HELPERS
     // -----------------------------------------------------------------------------------------------------------------
 
     public static void loadImages() {
-        try {
-            wallscrollSimulator.wallscrolls = Files.walk(wallscrollSimulator.wallscrollImagesPath.toAbsolutePath())
+        try (Stream<Path> walk = Files.walk(wallscrollSimulator.wallscrollImagesPath.toAbsolutePath())) {
+            wallscrollSimulator.wallscrolls = walk
                     .filter(pa -> Wallscroll.PATTERN.matcher(pa.getFileName().toString()).matches())
-                    .collect(Collectors.toMap(Path::toString, pa -> wallscrollSimulator.loadImage(pa.toString())));
+                    .collect(Collectors.toMap(Path::toString, pa -> {
+                        PImage i = wallscrollSimulator.loadImage(pa.toString());
+                        i.resize(i.width > i.height ? min(500, i.width) : 0, i.width > i.height ? 0 : min(500, i.height));
+                        return i;
+                    }));
+            wallscrollSimulator.configIcon = wallscrollSimulator.loadImage(Thread.currentThread().getContextClassLoader().getResource("config_file_icon.png").getFile());
         } catch (IOException e) {
             e.printStackTrace();
             wallscrollSimulator.exit();
@@ -135,8 +147,8 @@ public class WallscrollSimulator extends PApplet {
     }
 
     public static void loadConfigs() {
-        try {
-            wallscrollSimulator.configs = Files.walk(wallscrollSimulator.wallscrollConfigPath.toAbsolutePath(), 1)
+        try (Stream<Path> walk = Files.walk(wallscrollSimulator.wallscrollConfigPath.toAbsolutePath(), 1)) {
+            wallscrollSimulator.configs = walk
                     .filter(pa -> WALLSCROLL_CONFIG_PATTERN.matcher(pa.getFileName().toString()).matches())
                     .map(Path::toAbsolutePath)
                     .collect(Collectors.toList());

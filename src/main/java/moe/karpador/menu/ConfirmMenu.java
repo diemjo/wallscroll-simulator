@@ -1,6 +1,7 @@
 package moe.karpador.menu;
 
 import moe.karpador.WallscrollSimulator;
+import moe.karpador.view.Button;
 import moe.karpador.view.View;
 import moe.karpador.view.ViewConstraint;
 import moe.karpador.view.ViewInstance;
@@ -16,26 +17,26 @@ import static processing.core.PConstants.*;
 public class ConfirmMenu extends View {
     private final String text;
     private final int textSize;
-    private final ViewInstance<TextButton> confirm;
-    private final ViewInstance<TextButton> cancel;
+    private final ViewInstance<Button<TextView>> confirm;
+    private final ViewInstance<Button<TextView>> cancel;
 
     public ConfirmMenu(String text, int textSize, Runnable func) {
         super();
         this.text = text;
         this.textSize = textSize;
-        confirm = new ViewInstance<>(new TextButton("Confirm", () -> {
+        confirm = new ViewInstance<>(new Button<>(new TextView("Confirm", textSize), () -> {
             WallscrollSimulator.popView();
             func.run();
-        }, textSize));
-        cancel = new ViewInstance<>(new TextButton("Cancel", () -> {
+        }));
+        cancel = new ViewInstance<>(new Button<>(new TextView("Cancel", textSize), () -> {
             WallscrollSimulator.popView();
-        }, textSize));
+        }));
     }
 
     @Override
     protected PGraphics build(ViewConstraint constraint) {
-        float confirmWidth = WallscrollSimulator.getTextWidth(confirm.v.text, confirm.v.textSize) + 8;
-        float cancelWidth = WallscrollSimulator.getTextWidth(cancel.v.text, cancel.v.textSize) + 8;
+        float confirmWidth = WallscrollSimulator.getTextWidth(confirm.v.view().text, confirm.v.view().textSize) + 8;
+        float cancelWidth = WallscrollSimulator.getTextWidth(cancel.v.view().text, cancel.v.view().textSize) + 8;
         float textWidth = WallscrollSimulator.getTextWidth(text, textSize);
         int padding = (int) min(50, textSize*1.5f);
         float maxWidth = max(confirmWidth + cancelWidth, textWidth);
@@ -67,7 +68,7 @@ public class ConfirmMenu extends View {
     @Override
     public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == LEFT) {
-            for (ViewInstance<TextButton> bi : List.of(cancel, confirm)) {
+            for (ViewInstance<Button<TextView>> bi : List.of(cancel, confirm)) {
                 if (bi.hover(mouse)) {
                     PVector pos = bi.mousePos(mouse);
                     bi.v.mousePressed(mouseButton, pos);
@@ -79,7 +80,7 @@ public class ConfirmMenu extends View {
 
     @Override
     public boolean update(long time) {
-        for (ViewInstance<TextButton> bi : List.of(cancel, confirm)) {
+        for (ViewInstance<Button<TextView>> bi : List.of(cancel, confirm)) {
             if (bi.v.update(time)) {
                 modified();
             }
