@@ -35,11 +35,9 @@ public class Room {
         for(Furniture furniture : furnitures) {
             furniture.draw(g);
         }
-        g.pushMatrix();
         for(Wallscroll wallscroll : wallscrolls) {
             wallscroll.draw(g, getWallPos(wallscroll.side));
         }
-        g.popMatrix();
     }
 
     public PVector getWallPos(WallSide side) {
@@ -90,7 +88,7 @@ public class Room {
 
     public void saveWallscrolls(Path dir) {
         String save = getWallscrollsConfig();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat(WallscrollSimulator.getDateFormat());
         Path config = dir.resolve("wallscrolls-" + format.format(Date.from(Instant.now())) + ".yaml");
         try {
             Files.writeString(config, save);

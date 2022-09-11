@@ -30,6 +30,7 @@ public class WallscrollSimulator extends PApplet {
     private final Path wallscrollImagesPath;
     private Map<String, PImage> wallscrolls;
     private List<Path> configs;
+    private String configDateFormat;
 
     private PImage configIcon;
 
@@ -37,6 +38,7 @@ public class WallscrollSimulator extends PApplet {
         String tempRoom = "room.yaml";
         String tempImages = ".";
         String tempConfig = ".";
+        String tempDateFormat = "yyyy-MM-dd";
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "-h", "--help" -> {
@@ -49,18 +51,25 @@ public class WallscrollSimulator extends PApplet {
                     tempRoom = args[i + 1];
                     i++;
                 }
-                case "-c", "--config" -> {
+                case "-c", "--config-dir" -> {
                     if (i == args.length - 1) {
                         printHelp();
                     }
                     tempConfig = args[i + 1];
                     i++;
                 }
-                case "-w", "--wallscrolls" -> {
+                case "-w", "--wallscroll-dir" -> {
                     if (i == args.length - 1) {
                         printHelp();
                     }
                     tempImages = args[i + 1];
+                    i++;
+                }
+                case "-f", "--date-format" -> {
+                    if (i == args.length - 1) {
+                        printHelp();
+                    }
+                    tempDateFormat = args[i + 1];
                     i++;
                 }
                 default -> {
@@ -81,7 +90,7 @@ public class WallscrollSimulator extends PApplet {
         if (!wallscrollImagesPath.toFile().isDirectory()) {
             throw new IllegalArgumentException("Wallscroll image directory does not exists");
         }
-        float displayScaling = Toolkit.getDefaultToolkit().getScreenResolution() / 96.0f;
+        this.configDateFormat = tempDateFormat;
     }
 
     public static void main(String[] args) {
@@ -95,10 +104,11 @@ public class WallscrollSimulator extends PApplet {
                 Usage: wallscroll-simulator [Options]
                 
                 Options:
-                    -h, --help                  show this help
-                    -r, --room <config>         use room config <config> (default 'room.yaml')
-                    -c, --config <dir>          use wallscroll configs from directory <dir> (default './')
-                    -w, --wallscrolls <dir>     use wallscroll images from directory <dir> recursively (default './')
+                    -h, --help                   show this help
+                    -r, --room <config>          use room config <config> (default 'room.yaml')
+                    -c, --config-dir <dir>       use wallscroll configs from directory <dir> (default './')
+                    -w, --wallscroll-dir <dir>   use wallscroll images from directory <dir> recursively (default './')
+                    -f, --date-format <format>   use date format for saved wallscroll configs (default 'yyyy-MM-dd')
                 """
         );
         System.exit(1);
@@ -125,6 +135,9 @@ public class WallscrollSimulator extends PApplet {
 
     public static PImage getConfigIcon() {
         return wallscrollSimulator.configIcon;
+    }
+    public static String getDateFormat() {
+        return wallscrollSimulator.configDateFormat;
     }
 
     // HELPERS
