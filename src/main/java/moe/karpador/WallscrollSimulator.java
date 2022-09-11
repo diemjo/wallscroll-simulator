@@ -102,7 +102,7 @@ public class WallscrollSimulator extends PApplet {
 
     private static void printHelp() {
         System.out.println("""
-                wallscroll-simulator
+                wallscroll-simulator v1.1
                 Usage: wallscroll-simulator [Options]
                 
                 Options:

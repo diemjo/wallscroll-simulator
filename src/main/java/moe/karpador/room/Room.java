@@ -80,6 +80,7 @@ public class Room {
                     .toList();
             clearWallscrolls();
             this.wallscrolls.addAll(wallscrolls);
+            changed = false;
         } catch (IOException e) {
             System.err.println("Error reading file: '"+path+"'");
             e.printStackTrace();
