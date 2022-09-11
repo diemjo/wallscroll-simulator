@@ -10,6 +10,7 @@ import processing.event.MouseEvent;
 public abstract class View {
     private final String renderer;
     protected PGraphics g;
+    private PGraphics builtG;
     private boolean modified = true;
 
     protected View(String renderer) {
@@ -22,14 +23,14 @@ public abstract class View {
     protected abstract PGraphics build(ViewConstraint constraint);
 
     public final PGraphics draw(ViewConstraint constraint) {
-        if (modified || g==null || !constraint.matchesSize(new PVector(g.width, g.height))) {
-            g = build(constraint);
+        if (modified || builtG==null || !constraint.matchesSize(new PVector(builtG.width, builtG.height))) {
+            builtG = build(constraint);
             modified = false;
         }
-        if (!constraint.matchesSize(new PVector(g.width, g.height))) {
-            throw new IllegalStateException("View "+this+"("+g.width+","+g.height+") did not follow constraints "+constraint);
+        if (!constraint.matchesSize(new PVector(builtG.width, builtG.height))) {
+            throw new IllegalStateException("View "+this+"("+builtG.width+","+builtG.height+") did not follow constraints "+constraint);
         }
-        return g;
+        return builtG;
     }
 
     protected void modified() {
@@ -37,6 +38,10 @@ public abstract class View {
     }
 
     protected PGraphics clearG(PGraphics g, int w, int h) {
+        return clearG(g, w, h, this.renderer);
+    }
+
+    protected PGraphics clearG(PGraphics g, int w, int h, String renderer) {
         if (g==null || g.width!=w || g.height!=h) {
             PGraphics pg = WallscrollSimulator.createPGraphics(w, h, renderer);
             pg.beginDraw();

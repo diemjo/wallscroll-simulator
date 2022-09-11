@@ -5,7 +5,9 @@ import moe.karpador.menu.Menu;
 import moe.karpador.view.Container;
 import moe.karpador.view.View;
 import moe.karpador.view.ViewConstraint;
+import processing.awt.PImageAWT;
 import processing.core.PGraphics;
+import processing.core.PImage;
 import processing.core.PVector;
 
 import java.nio.file.Path;
@@ -18,7 +20,8 @@ public class RoomView extends View {
 
     public final Room room;
 
-    private PGraphics g;
+    private PGraphics gfinal;
+    private PGraphics gui;
 
     PVector camPos;
     PVector camDir;
@@ -28,6 +31,11 @@ public class RoomView extends View {
     Wallscroll selected;
     PVector selectedUV;
     int numAttempts = 0;
+
+    boolean nameHovering = false;
+    boolean hoverNeedsDraw = false;
+    long nameHoveringTime = 0;
+    PVector nameHoveringPosition;
 
     public RoomView(Room room) {
         super(P3D);
@@ -44,16 +52,54 @@ public class RoomView extends View {
     @Override
     public PGraphics build(ViewConstraint constraint) {
         g = clearG(g, (int) constraint.maxSize.x, (int) constraint.maxSize.y);
-        g.beginDraw();
 
-        g.pushMatrix();
         g.background(255);
+        g.pushMatrix();
         setCamera();
         room.draw(g);
         g.popMatrix();
-
         g.endDraw();
-        return g;
+
+        if (nameHovering && selected != null) {
+            gui = clearG(gui, g.width, g.height, JAVA2D);
+            String text = selected.path.getFileName().toString();
+            int textSize = WallscrollSimulator.menuTextSize();
+            float len = WallscrollSimulator.getTextWidth(text, textSize);
+            //PVector pos = new PVector(g.width * ((1 - fov) * 0.5f), g.height * ((1 - fov) * 0.5f));
+            PVector pos = nameHoveringPosition;
+            gui.fill(255);
+            gui.rect(pos.x - 8, pos.y - 2, len + 16, textSize*1.5f);
+            gui.fill(0);
+            gui.textSize(textSize);
+            gui.textAlign(LEFT, TOP);
+            gui.text(text, pos.x, pos.y);
+            gui.endDraw();
+        } else {
+            gui = null;
+        }
+
+        if (gui==null) {
+            return g;
+        } else {
+            gfinal = clearG(gfinal, g.width, g.height, JAVA2D);
+            gfinal.background(255);
+            gfinal.image(g.get(), 0, 0);
+            gfinal.image(gui, 0, 0);
+            gfinal.endDraw();
+            return gfinal;
+        }
+    }
+
+    @Override
+    public boolean update(long time) {
+        if (nameHovering) {
+            long timediff = (System.currentTimeMillis() - nameHoveringTime);
+            if (timediff > 2000) {
+                nameHovering = false;
+                modified();
+            }
+        }
+        return super.update(time);
     }
 
     @Override
@@ -74,9 +120,11 @@ public class RoomView extends View {
     public void mouseDragged(int mouseButton, PVector mouse, PVector pmouse) {
         if (mouseButton == RIGHT) {
             moveCamera(mouse, pmouse);
+            nameHovering = false;
             modified();
         } else if (mouseButton == LEFT) {
             if (moveSelected(mouse, pmouse)) {
+                nameHovering = false;
                 modified();
             }
         }
@@ -98,6 +146,17 @@ public class RoomView extends View {
                     selected = null;
                     modified();
                 }
+            }
+            case ALT -> {
+                selectWallscroll(mouse);
+                if (selected!=null) {
+                    nameHovering = true;
+                    nameHoveringPosition = mouse;
+                    nameHoveringTime = System.currentTimeMillis();
+                } else {
+                    nameHovering = false;
+                }
+                modified();
             }
             default -> {
                 return false;
@@ -122,6 +181,9 @@ public class RoomView extends View {
     public void selectWallscroll(PVector mouse) {
         g.pushMatrix();
         setCamera();
+        Wallscroll pselected = this.selected;
+        this.selected = null;
+        this.selectedUV = null;
         for (Wallscroll wallscroll : room.wallscrolls) {
             PVector uv = getWallscrollUV(wallscroll, mouse);
             if (uv!=null) {
@@ -129,6 +191,9 @@ public class RoomView extends View {
                 this.selectedUV = uv;
                 break;
             }
+        }
+        if (pselected != this.selected) {
+            modified();
         }
         g.popMatrix();
     }
