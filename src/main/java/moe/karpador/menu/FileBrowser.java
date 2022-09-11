@@ -12,6 +12,7 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,7 @@ public class FileBrowser extends View {
                             case SAFE -> true;
                             case EXPLICIT -> !titleBar.v.checked("Only safe");
                         })
+                        .sorted(Comparator.comparing(w -> w.view().wallscroll.path))
                         .map(w -> (View) w)
                         .toList();
                 grid.v.setEntries(currentWallscrolls);
