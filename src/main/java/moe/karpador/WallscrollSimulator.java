@@ -8,8 +8,10 @@ import moe.karpador.view.ViewConstraint;
 import processing.core.*;
 import processing.event.MouseEvent;
 
-import java.awt.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -152,7 +154,9 @@ public class WallscrollSimulator extends PApplet {
                         i.resize(i.width > i.height ? min(500, i.width) : 0, i.width > i.height ? 0 : min(500, i.height));
                         return i;
                     }));
-            wallscrollSimulator.configIcon = wallscrollSimulator.loadImage(Thread.currentThread().getContextClassLoader().getResource("config_file_icon.png").getFile());
+            URL url = Thread.currentThread().getContextClassLoader().getResource("config_file_icon.png");
+            BufferedImage image = ImageIO.read(url);
+            wallscrollSimulator.configIcon = new PImage(image);
         } catch (IOException e) {
             e.printStackTrace();
             wallscrollSimulator.exit();
