@@ -70,7 +70,6 @@ public class EntryGrid<T extends View> extends View {
             entriesChanged = false;
         }
         g = clearG(g, (int) (gridG.width + scrollBarWidth), (int) constraint.maxSize.y);
-        g.beginDraw();
 
         g.image(gridG, 0, -scrollOffset);
 

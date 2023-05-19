@@ -43,7 +43,7 @@ public abstract class View {
 
     protected PGraphics clearG(PGraphics g, int w, int h, String renderer) {
         if (g==null || g.width!=w || g.height!=h) {
-            PGraphics pg = WallscrollSimulator.createPGraphics(w, h, renderer);
+            PGraphics pg = WallscrollSimulator.createPGraphics(Math.max(1, w), Math.max(1, h), renderer);
             pg.beginDraw();
             return pg;
         } else {

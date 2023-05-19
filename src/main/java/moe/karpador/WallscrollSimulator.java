@@ -168,6 +168,7 @@ public class WallscrollSimulator extends PApplet {
             wallscrollSimulator.configs = walk
                     .filter(pa -> WALLSCROLL_CONFIG_PATTERN.matcher(pa.getFileName().toString()).matches())
                     .map(Path::toAbsolutePath)
+                    .sorted((a, b) -> -a.compareTo(b))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
