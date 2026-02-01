@@ -43,7 +43,6 @@ public class FileBrowser extends View {
                         .map(e -> new Wallscroll(Path.of(e.getKey()), e.getValue()))
                         .map(w -> new Button<>(new WallscrollEntry(w, textSize), () -> {
                             roomView.placeWallscroll(w.copy());
-                            WallscrollSimulator.popView();
                         }))
                                 .collect(Collectors.toList());
                 this.configs = null;
