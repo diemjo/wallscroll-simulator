@@ -54,7 +54,8 @@ public class FileBrowser extends View {
                                 new CheckBox.RememberOption("B1", true),
                                 new CheckBox.RememberOption("B2", true),
                                 new CheckBox.RememberOption("Long", true),
-                                new CheckBox.RememberOption("Only safe", true))
+                                new CheckBox.RememberOption("safe", true),
+                                new CheckBox.RememberOption("explicit", false))
                         )
                 );
             }
@@ -86,8 +87,8 @@ public class FileBrowser extends View {
                             case LONG -> titleBar.v.checked("Long") && titleBar.v.checked("portrait");
                         })
                         .filter(w -> switch (w.view().wallscroll.rating) {
-                            case SAFE -> true;
-                            case EXPLICIT -> !titleBar.v.checked("Only safe");
+                            case SAFE -> titleBar.v.checked("safe");
+                            case EXPLICIT -> titleBar.v.checked("explicit");
                         })
                         .sorted(Comparator.comparing(w -> w.view().wallscroll.path))
                         .map(w -> (View) w)
