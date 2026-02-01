@@ -8,11 +8,14 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CheckBox extends View {
 
     public final String hint;
     public final int textSize;
-    private Option option;
+    private final Option option;
     private float boxSide;
 
     public CheckBox(String hint, int textSize, Option option) {
@@ -68,7 +71,7 @@ public class CheckBox extends View {
         }
     }
 
-    static class Option {
+    public static class Option {
         public final String id;
         private boolean state;
         public Option(String id, boolean defaultState) {
@@ -82,6 +85,20 @@ public class CheckBox extends View {
 
         public boolean get() {
             return state;
+        }
+    }
+
+    static class RememberOption extends Option {
+        private static final Map<String, Boolean> REMEMBERED_OPTIONS = new HashMap<>();
+
+        public RememberOption(String id, boolean defaultState) {
+            super(id, REMEMBERED_OPTIONS.get(id) != null ? REMEMBERED_OPTIONS.get(id) : defaultState);
+        }
+
+        @Override
+        public void toggle() {
+            super.toggle();
+            REMEMBERED_OPTIONS.put(id, get());
         }
     }
 }

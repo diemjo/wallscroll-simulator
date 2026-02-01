@@ -48,13 +48,13 @@ public class FileBrowser extends View {
                 this.configs = null;
                 this.titleBar = new ViewInstance<>(
                         new TitleBar("Select Wallscroll", WallscrollSimulator.viewTitleTextSize(), List.of(
-                                new CheckBox.Option("portrait", true),
-                                new CheckBox.Option("landscape", true),
-                                new CheckBox.Option("B0", true),
-                                new CheckBox.Option("B1", true),
-                                new CheckBox.Option("B2", true),
-                                new CheckBox.Option("Long", true),
-                                new CheckBox.Option("Only safe", true))
+                                new CheckBox.RememberOption("portrait", true),
+                                new CheckBox.RememberOption("landscape", true),
+                                new CheckBox.RememberOption("B0", true),
+                                new CheckBox.RememberOption("B1", true),
+                                new CheckBox.RememberOption("B2", true),
+                                new CheckBox.RememberOption("Long", true),
+                                new CheckBox.RememberOption("Only safe", true))
                         )
                 );
             }
