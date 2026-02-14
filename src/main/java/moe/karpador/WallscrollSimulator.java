@@ -1,8 +1,8 @@
 package moe.karpador;
 
+import moe.karpador.model.Wallscroll;
 import moe.karpador.room.Room;
 import moe.karpador.room.RoomView;
-import moe.karpador.room.Wallscroll;
 import moe.karpador.view.View;
 import moe.karpador.view.ViewConstraint;
 import processing.core.*;
@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +31,7 @@ public class WallscrollSimulator extends PApplet {
     private final Path roomConfigPath;
     private final Path wallscrollConfigPath;
     private final Path wallscrollImagesPath;
-    private Map<String, PImage> wallscrolls;
+    private Map<String, Wallscroll> wallscrolls;
     private List<Path> configs;
     private String configDateFormat;
 
@@ -60,7 +61,7 @@ public class WallscrollSimulator extends PApplet {
                     tempConfig = args[i + 1];
                     i++;
                 }
-                case "-w", "--wallscroll-dir" -> {
+                case "-w", "--wallscrollPlacement-dir" -> {
                     if (i == args.length - 1) {
                         printHelp();
                     }
@@ -102,15 +103,15 @@ public class WallscrollSimulator extends PApplet {
 
     private static void printHelp() {
         System.out.println("""
-                wallscroll-simulator v1.1
-                Usage: wallscroll-simulator [Options]
+                wallscrollPlacement-simulator v1.1
+                Usage: wallscrollPlacement-simulator [Options]
                 
                 Options:
                     -h, --help                   show this help
                     -r, --room <config>          use room config <config> (default 'room.yaml')
-                    -c, --config-dir <dir>       use wallscroll configs from directory <dir> (default './')
-                    -w, --wallscroll-dir <dir>   use wallscroll images from directory <dir> recursively (default './')
-                    -f, --date-format <format>   use date format for saved wallscroll configs (default 'yyyy-MM-dd')
+                    -c, --config-dir <dir>       use wallscrollPlacement configs from directory <dir> (default './')
+                    -w, --wallscrollPlacement-dir <dir>   use wallscrollPlacement images from directory <dir> recursively (default './')
+                    -f, --date-format <format>   use date format for saved wallscrollPlacement configs (default 'yyyy-MM-dd')
                 """
         );
         System.exit(1);
@@ -127,7 +128,7 @@ public class WallscrollSimulator extends PApplet {
         return wallscrollSimulator.wallscrollConfigPath;
     }
 
-    public static Map<String, PImage> getWallscrolls() {
+    public static Map<String, Wallscroll> getWallscrolls() {
         return wallscrollSimulator.wallscrolls;
     }
 
@@ -138,6 +139,7 @@ public class WallscrollSimulator extends PApplet {
     public static PImage getConfigIcon() {
         return wallscrollSimulator.configIcon;
     }
+
     public static String getDateFormat() {
         return wallscrollSimulator.configDateFormat;
     }
@@ -149,11 +151,12 @@ public class WallscrollSimulator extends PApplet {
         try (Stream<Path> walk = Files.walk(wallscrollSimulator.wallscrollImagesPath.toAbsolutePath())) {
             wallscrollSimulator.wallscrolls = walk
                     .filter(pa -> Wallscroll.PATTERN.matcher(pa.getFileName().toString()).matches())
-                    .collect(Collectors.toMap(Path::toString, pa -> {
-                        PImage i = wallscrollSimulator.loadImage(pa.toString());
+                    .map(path -> {
+                        PImage i = wallscrollSimulator.loadImage(path.toString());
                         i.resize(i.width > i.height ? min(500, i.width) : 0, i.width > i.height ? 0 : min(500, i.height));
-                        return i;
-                    }));
+                        return new Wallscroll(path, i);
+                    })
+                    .collect(Collectors.toMap(w -> w.id, Function.identity()));
             URL url = Thread.currentThread().getContextClassLoader().getResource("config_file_icon.png");
             BufferedImage image = ImageIO.read(url);
             wallscrollSimulator.configIcon = new PImage(image);
@@ -181,7 +184,7 @@ public class WallscrollSimulator extends PApplet {
     }
 
     public static void popView() {
-        wallscrollSimulator.views.remove(wallscrollSimulator.views.size()-1);
+        wallscrollSimulator.views.remove(wallscrollSimulator.views.size() - 1);
     }
 
     public static void preventEscape() {
@@ -198,16 +201,19 @@ public class WallscrollSimulator extends PApplet {
     }
 
     public static int menuTextSize() {
-        return (int) (wallscrollSimulator.width*0.015f);
+        return (int) (wallscrollSimulator.width * 0.015f);
     }
+
     public static int buttonDescTextSize() {
-        return (int) (wallscrollSimulator.width*0.010f);
+        return (int) (wallscrollSimulator.width * 0.010f);
     }
+
     public static int viewTitleTextSize() {
-        return (int) (wallscrollSimulator.width*0.020f);
+        return (int) (wallscrollSimulator.width * 0.020f);
     }
+
     public static int pathTextSize() {
-        return (int) (wallscrollSimulator.width*0.008f);
+        return (int) (wallscrollSimulator.width * 0.008f);
     }
 
     // PROCESSING FUNCTIONS
@@ -220,7 +226,7 @@ public class WallscrollSimulator extends PApplet {
     @Override
     protected PSurface initSurface() {
         PSurface surface = super.initSurface();
-        com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(surface.getNative());
+        com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow) (surface.getNative());
         window.setResizable(true);
         window.setMaximized(true, true);
         return surface;
@@ -253,19 +259,19 @@ public class WallscrollSimulator extends PApplet {
 
     @Override
     public void mousePressed() {
-        View top = views.get(views.size()-1);
+        View top = views.get(views.size() - 1);
         top.mousePressed(mouseButton, new PVector(mouseX, mouseY));
     }
 
     @Override
     public void mouseReleased() {
-        View top = views.get(views.size()-1);
+        View top = views.get(views.size() - 1);
         top.mouseReleased(mouseButton, new PVector(mouseX, mouseY));
     }
 
     @Override
     public void mouseDragged() {
-        View top = views.get(views.size()-1);
+        View top = views.get(views.size() - 1);
         top.mouseDragged(mouseButton, new PVector(mouseX, mouseY), new PVector(pmouseX, pmouseY));
     }
 
@@ -281,7 +287,7 @@ public class WallscrollSimulator extends PApplet {
 
     @Override
     public void keyPressed() {
-        View top = views.get(views.size()-1);
+        View top = views.get(views.size() - 1);
         top.keyPressed(key, keyCode, new PVector(mouseX, mouseY));
     }
 }

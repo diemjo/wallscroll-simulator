@@ -1,22 +1,21 @@
 package moe.karpador.menu;
 
 import moe.karpador.WallscrollSimulator;
+import moe.karpador.room.RoomView;
+import moe.karpador.room.WallscrollPlacement;
 import moe.karpador.view.Button;
 import moe.karpador.view.View;
-import moe.karpador.room.RoomView;
-import moe.karpador.room.Wallscroll;
 import moe.karpador.view.ViewConstraint;
 import moe.karpador.view.ViewInstance;
 import processing.core.PGraphics;
 import processing.core.PVector;
-import processing.event.MouseEvent;
 
-import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static processing.core.PApplet.*;
+import static processing.core.PApplet.LEFT;
+import static processing.core.PApplet.max;
 
 
 public class FileBrowser extends View {
@@ -39,12 +38,13 @@ public class FileBrowser extends View {
         this.grid = new ViewInstance<>(new EntryGrid(COLS));
         switch (type) {
             case WallscrollBrowser -> {
-                this.wallscrolls = WallscrollSimulator.getWallscrolls().entrySet().stream()
-                        .map(e -> new Wallscroll(Path.of(e.getKey()), e.getValue()))
-                        .map(w -> new Button<>(new WallscrollEntry(w, textSize), () -> {
-                            roomView.placeWallscroll(w.copy());
-                        }))
-                                .collect(Collectors.toList());
+                this.wallscrolls = WallscrollSimulator.getWallscrolls().values().stream()
+                        .map(wallscroll -> new Button<>(
+                                        new WallscrollEntry(wallscroll, textSize),
+                                        () -> roomView.placeWallscroll(new WallscrollPlacement(wallscroll))
+                                )
+                        )
+                        .toList();
                 this.configs = null;
                 this.titleBar = new ViewInstance<>(
                         new TitleBar("Select Wallscroll", WallscrollSimulator.viewTitleTextSize(), List.of(
@@ -84,6 +84,7 @@ public class FileBrowser extends View {
                             case B1P -> titleBar.v.checked("B1") && titleBar.v.checked("portrait");
                             case B1L -> titleBar.v.checked("B1") && titleBar.v.checked("landscape");
                             case B0P -> titleBar.v.checked("B0") && titleBar.v.checked("portrait");
+                            case B0L -> titleBar.v.checked("B0") && titleBar.v.checked("landscape");
                             case LONG -> titleBar.v.checked("Long") && titleBar.v.checked("portrait");
                         })
                         .filter(w -> switch (w.view().wallscroll.rating) {
@@ -108,7 +109,7 @@ public class FileBrowser extends View {
     protected PGraphics build(ViewConstraint constraint) {
         float width = max(constraint.minSize.x, constraint.maxSize.x * 4 / 5);
         float height = max(constraint.minSize.y, constraint.maxSize.y * 4 / 5);
-        float titleHeight = titleBar.v.textSize*2;
+        float titleHeight = titleBar.v.textSize * 2;
         titleBar.draw(ViewConstraint.max(new PVector(width, titleHeight)));
         titleBar.position = new PVector(0, 0);
         grid.draw(ViewConstraint.max(new PVector(width, height - titleHeight)));

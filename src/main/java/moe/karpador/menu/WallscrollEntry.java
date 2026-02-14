@@ -1,10 +1,12 @@
 package moe.karpador.menu;
 
-import moe.karpador.room.Wallscroll;
+import moe.karpador.model.Wallscroll;
 import moe.karpador.view.View;
 import moe.karpador.view.ViewConstraint;
 import moe.karpador.view.ViewInstance;
-import processing.core.*;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PVector;
 
 public class WallscrollEntry extends View {
     public final Wallscroll wallscroll;
@@ -36,7 +38,7 @@ public class WallscrollEntry extends View {
 
         g.noFill();
         g.strokeWeight(2);
-        g.rect(1, 1, width-2, width-1);
+        g.rect(1, 1, width - 2, width - 1);
         //g.rect(1, height-textBoxHeight, width-2, textBoxHeight-1);
 
         image.position = new PVector(2, 2);
