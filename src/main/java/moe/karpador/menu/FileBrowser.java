@@ -91,7 +91,7 @@ public class FileBrowser extends View {
                             case SAFE -> titleBar.v.checked("safe");
                             case EXPLICIT -> titleBar.v.checked("explicit");
                         })
-                        .sorted(Comparator.comparing(w -> w.view().wallscroll.path))
+                        .sorted(Comparator.comparing(w -> w.view().wallscroll.id))
                         .map(w -> (View) w)
                         .toList();
                 grid.v.setEntries(currentWallscrolls);
