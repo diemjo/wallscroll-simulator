@@ -21,15 +21,15 @@ public class Menu extends View {
         int textSize = WallscrollSimulator.menuTextSize();
         this.buttons = List.of(
                 new ViewInstance<>(new Button<>(new TextView("Return to room", textSize),
-                        () -> WallscrollSimulator.popView()
+                        (textView) -> WallscrollSimulator.popView()
 
                 )),
                 new ViewInstance<>(new Button<>(new TextView("Add wallscroll", textSize),
-                        () -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(WallscrollBrowser, roomView), true))
+                        (textView) -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(WallscrollBrowser, roomView), true))
 
                 )),
                 new ViewInstance<>(new Button<>(new TextView("Load wallscroll config", textSize),
-                        () -> {
+                        (textView) -> {
                             Runnable r = () -> WallscrollSimulator.pushView(new Container<>(new FileBrowser(ConfigBrowser, roomView), true));
                             if (room.changed)
                                 attemptTo("Are you sure you want to overwrite room setup? You have unsaved changes!", r);
@@ -39,14 +39,14 @@ public class Menu extends View {
 
                 )),
                 new ViewInstance<>(new Button<>(new TextView("Save wallscrolls config", textSize),
-                        () -> {
+                        (textView) -> {
                             room.saveWallscrolls(WallscrollSimulator.getWallscrollConfigPath());
                             WallscrollSimulator.popView();
                         }
 
                 )),
                 new ViewInstance<>(new Button<>(new TextView("Quit", textSize),
-                        () -> {
+                        (textView) -> {
                             Runnable r = WallscrollSimulator::exitApp;
                             if (room.changed)
                                 attemptTo("Are you sure you want to quit? You have unsaved changes!", r);

@@ -4,18 +4,24 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.function.Consumer;
+
 public class Button<T extends View> extends View {
 
     private final ViewInstance<T> view;
-    private final Runnable func;
+    private final Consumer<T> func;
 
-    public Button(T view, Runnable func) {
+    public Button(T view, Consumer<T> func) {
         this.view = new ViewInstance<>(view);
         this.func = func;
     }
 
     public T view() {
         return view.v;
+    }
+
+    public Button<T> copyWith(T view) {
+        return new Button<>(view, func);
     }
 
     @Override
@@ -34,7 +40,7 @@ public class Button<T extends View> extends View {
     @Override
     public void mousePressed(int mouseButton, PVector mouse) {
         if (mouseButton == PConstants.LEFT) {
-            func.run();
+            func.accept(view.v);
         }
     }
 

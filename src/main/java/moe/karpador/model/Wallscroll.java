@@ -7,13 +7,15 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Wallscroll {
-    public static final Pattern PATTERN = Pattern.compile("(?<id>(?<rating>" + Rating.REGEX + ")\\d+)-(?<format>" + ScrollFormat.REGEX + ")\\.\\w+");
+    public static final Pattern PATTERN = Pattern.compile("(?<id>(?<rating>" + Rating.REGEX + ")\\d+)-(?<format>" + ScrollFormat.REGEX + ")(-(?<side>front|back))?\\.\\w+");
 
     public String id;
     public Path path;
     public PImage image;
     public Rating rating;
     public ScrollFormat format;
+    public boolean isFront;
+    public Wallscroll backside;
 
     public Wallscroll(Path path, PImage image) {
         var filename = path.getFileName().toString();
@@ -25,6 +27,7 @@ public class Wallscroll {
         this.image = image;
         this.rating = Rating.fromString(matcher.group("rating"));
         this.format = Wallscroll.ScrollFormat.byName(matcher.group("format") + ((image.height > image.width) ? "p" : "l"));
+        this.isFront = matcher.group("side") == null || matcher.group("side").equals("front");
     }
 
     public enum Rating {

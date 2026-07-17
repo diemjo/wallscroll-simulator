@@ -41,30 +41,31 @@ public class FileBrowser extends View {
                 this.wallscrolls = WallscrollSimulator.getWallscrolls().values().stream()
                         .map(wallscroll -> new Button<>(
                                         new WallscrollEntry(wallscroll, textSize),
-                                        () -> roomView.placeWallscroll(new WallscrollPlacement(wallscroll))
+                                        (entry) -> roomView.placeWallscroll(new WallscrollPlacement(entry.wallscroll))
                                 )
                         )
                         .toList();
                 this.configs = null;
                 this.titleBar = new ViewInstance<>(
                         new TitleBar("Select Wallscroll", WallscrollSimulator.viewTitleTextSize(), List.of(
-                                new CheckBox.RememberOption("portrait", true),
-                                new CheckBox.RememberOption("landscape", true),
-                                new CheckBox.RememberOption("B0", true),
-                                new CheckBox.RememberOption("B1", true),
-                                new CheckBox.RememberOption("B2", true),
-                                new CheckBox.RememberOption("Long", true),
-                                new CheckBox.RememberOption("safe", true),
-                                new CheckBox.RememberOption("explicit", false))
-                        )
+                                new CheckBox.RememberOption("portrait", "Portrait", true),
+                                new CheckBox.RememberOption("landscape", "Landscape", true),
+                                new CheckBox.RememberOption("B0", "B0", true),
+                                new CheckBox.RememberOption("B1", "B1", true),
+                                new CheckBox.RememberOption("B2", "B2", true),
+                                new CheckBox.RememberOption("long", "Long", true),
+                                new CheckBox.RememberOption("safe", "Safe", true),
+                                new CheckBox.RememberOption("explicit", "Explicit", false),
+                                new CheckBox.RememberOption("back", "Backside (if available)", false)
+                        ))
                 );
             }
             case ConfigBrowser -> {
                 this.wallscrolls = null;
                 WallscrollSimulator.loadConfigs();
                 this.configs = WallscrollSimulator.getConfigs().stream()
-                        .map(pa -> new Button<>(new ConfigEntry(pa, textSize), () -> {
-                            roomView.loadWallscrolls(pa);
+                        .map(pa -> new Button<>(new ConfigEntry(pa, textSize), (entry) -> {
+                            roomView.loadWallscrolls(entry.config);
                             WallscrollSimulator.popView();
                         }))
                         .collect(Collectors.toList());
@@ -78,6 +79,11 @@ public class FileBrowser extends View {
         switch (type) {
             case WallscrollBrowser -> {
                 List<View> currentWallscrolls = wallscrolls.stream()
+                        .map(w ->
+                            titleBar.v.checked("back") && w.view().wallscroll.backside != null
+                                    ? w.copyWith(new WallscrollEntry(w.view().wallscroll.backside, WallscrollSimulator.pathTextSize()))
+                                    : w
+                        )
                         .filter(w -> switch (w.view().wallscroll.format) {
                             case B2P -> titleBar.v.checked("B2") && titleBar.v.checked("portrait");
                             case B2L -> titleBar.v.checked("B2") && titleBar.v.checked("landscape");
@@ -85,7 +91,7 @@ public class FileBrowser extends View {
                             case B1L -> titleBar.v.checked("B1") && titleBar.v.checked("landscape");
                             case B0P -> titleBar.v.checked("B0") && titleBar.v.checked("portrait");
                             case B0L -> titleBar.v.checked("B0") && titleBar.v.checked("landscape");
-                            case LONG -> titleBar.v.checked("Long") && titleBar.v.checked("portrait");
+                            case LONG -> titleBar.v.checked("long") && titleBar.v.checked("portrait");
                         })
                         .filter(w -> switch (w.view().wallscroll.rating) {
                             case SAFE -> titleBar.v.checked("safe");

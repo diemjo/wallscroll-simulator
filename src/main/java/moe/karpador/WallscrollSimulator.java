@@ -156,7 +156,16 @@ public class WallscrollSimulator extends PApplet {
                         i.resize(i.width > i.height ? min(500, i.width) : 0, i.width > i.height ? 0 : min(500, i.height));
                         return new Wallscroll(path, i);
                     })
-                    .collect(Collectors.toMap(w -> w.id, Function.identity()));
+                    .collect(Collectors.toMap(w -> w.id, Function.identity(), (a, b) -> {
+                        if (a.isFront && !b.isFront) {
+                            a.backside = b;
+                            return a;
+                        } else if (!a.isFront && b.isFront) {
+                            b.backside = a;
+                            return b;
+                        }
+                        throw new IllegalStateException("Duplicate wallscroll id: " + a.id);
+                    }));
             URL url = Thread.currentThread().getContextClassLoader().getResource("config_file_icon.png");
             BufferedImage image = ImageIO.read(url);
             wallscrollSimulator.configIcon = new PImage(image);

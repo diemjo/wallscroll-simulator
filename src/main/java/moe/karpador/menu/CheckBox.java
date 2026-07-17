@@ -73,9 +73,11 @@ public class CheckBox extends View {
 
     public static class Option {
         public final String id;
+        public final String text;
         private boolean state;
-        public Option(String id, boolean defaultState) {
+        public Option(String id, String text, boolean defaultState) {
             this.id = id;
+            this.text = text;
             this.state = defaultState;
         }
 
@@ -91,8 +93,8 @@ public class CheckBox extends View {
     static class RememberOption extends Option {
         private static final Map<String, Boolean> REMEMBERED_OPTIONS = new HashMap<>();
 
-        public RememberOption(String id, boolean defaultState) {
-            super(id, REMEMBERED_OPTIONS.get(id) != null ? REMEMBERED_OPTIONS.get(id) : defaultState);
+        public RememberOption(String id, String text, boolean defaultState) {
+            super(id, text, REMEMBERED_OPTIONS.get(id) != null ? REMEMBERED_OPTIONS.get(id) : defaultState);
         }
 
         @Override

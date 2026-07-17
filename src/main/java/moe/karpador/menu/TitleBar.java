@@ -23,7 +23,7 @@ public class TitleBar extends View {
         this.textSize = textSize;
         this.options = options;
         this.checkboxes = new ViewInstance<>(new Row(options.stream()
-                .map(o -> (View) new Container<>(new CheckBox(o.id, WallscrollSimulator.buttonDescTextSize(), o), false))
+                .map(o -> (View) new Container<>(new CheckBox(o.text, WallscrollSimulator.buttonDescTextSize(), o), false))
                 .toList()
                 , SpacingType.EQUAL_SPACING));
     }

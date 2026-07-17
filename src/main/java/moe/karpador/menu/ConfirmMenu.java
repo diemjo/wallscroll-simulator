@@ -24,11 +24,11 @@ public class ConfirmMenu extends View {
         super();
         this.text = text;
         this.textSize = textSize;
-        confirm = new ViewInstance<>(new Button<>(new TextView("Confirm", textSize), () -> {
+        confirm = new ViewInstance<>(new Button<>(new TextView("Confirm", textSize), (view) -> {
             WallscrollSimulator.popView();
             func.run();
         }));
-        cancel = new ViewInstance<>(new Button<>(new TextView("Cancel", textSize), () -> {
+        cancel = new ViewInstance<>(new Button<>(new TextView("Cancel", textSize), (view) -> {
             WallscrollSimulator.popView();
         }));
     }
